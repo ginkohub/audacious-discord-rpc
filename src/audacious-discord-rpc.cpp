@@ -86,6 +86,7 @@ void init_discord() {
      rpc.onReady([](const discord::User &) {
              is_connected.store(true);
              AUDINFO("Discord RPC Connected.\r\n");
+             playback_to_presence();  // Directly played track? #8
         })
          .onDisconnected([](int, std::string_view) {
               is_connected.store(false);
