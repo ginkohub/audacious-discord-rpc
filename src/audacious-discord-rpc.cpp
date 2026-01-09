@@ -99,15 +99,21 @@ void init_discord() {
 
 void clear_discord() {
      if (!is_connected.load()) return;
+     ++req_id_now;  // Invalidate cover fetch tasks
+     std::lock_guard<std::mutex> lock(rpc_lock);
      presence = discord::Presence{};  // Full reset
-     presence.setLargeImageKey("logo").setLargeImageText("Audacious");
      rpc.clearPresence();
+     presence.setLargeImageKey("logo").setLargeImageText("Audacious");
 }
 
 void cleanup_discord() {
      if (!is_connected.load()) return;
+     std::lock_guard<std::mutex> lock(rpc_lock);
+     presence = discord::Presence{};  // Full reset
      rpc.clearPresence();
      rpc.shutdown();
+     is_connected.store(false);
+     AUDINFO("Discord RPC Shutdown completed.\r\n");
 }
 
 void update_presence() {
@@ -116,9 +122,11 @@ void update_presence() {
 }
 
 void init_presence() {
+     std::lock_guard<std::mutex> lock(rpc_lock);
      presence = discord::Presence{};
      presence.setLargeImageKey("logo").setLargeImageText("Audacious");
      update_presence();
+     req_id_now = 0;
 }
 
 /* === Audacious playback -> Discord RPC (main function) === */
@@ -156,9 +164,9 @@ void playback_to_presence() {
      artist = field_sanitise(artist);
      bool has_album = !audstr_empty(album);
      album = has_album ? field_sanitise(album) : String("");
-
      int status_display_type = aud_get_int(PLUGIN_ID, "status_display_type");
 
+     std::lock_guard<std::mutex> lock(rpc_lock);
      presence.setLargeImageKey("logo")
          .setActivityType(discord::ActivityType::Listening)
          .setStatusDisplayType(
@@ -218,6 +226,7 @@ void cover_to_presence(const String &artist, const String &album) {
                                   &req_id_now, req_id);
           if (url && !url->empty()
               && req_id == req_id_now.load(std::memory_order_relaxed)) {
+               std::lock_guard<std::mutex> lock(rpc_lock);
                presence.setLargeImageKey(*url);
                update_presence();
                AUDINFO("Discord RPC: Cover fetch task %llu applied!\r\n",

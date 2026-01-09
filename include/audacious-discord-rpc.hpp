@@ -27,6 +27,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <mutex>
 #include <string_view>
 #include <thread>
 
@@ -49,6 +50,7 @@
 #define PLUGIN_URL "https://github.com/onegentig/audacious-discord-rpc"
 #define DISCORD_APP_ID "1428914566795890738"
 
+std::mutex rpc_lock;
 static std::atomic<bool> is_connected{false};
 static std::atomic<unsigned long long> req_id_now{0};
 inline bool cover_fetch_stop(unsigned long long req_id) {
