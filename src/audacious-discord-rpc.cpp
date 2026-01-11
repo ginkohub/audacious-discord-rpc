@@ -98,17 +98,17 @@ void init_discord() {
 }
 
 void clear_discord() {
+     std::lock_guard<std::mutex> lock(rpc_lock);
      if (!is_connected.load()) return;
      ++req_id_now;  // Invalidate cover fetch tasks
-     std::lock_guard<std::mutex> lock(rpc_lock);
      presence = discord::Presence{};  // Full reset
      rpc.clearPresence();
      presence.setLargeImageKey("logo").setLargeImageText("Audacious");
 }
 
 void cleanup_discord() {
-     if (!is_connected.load()) return;
      std::lock_guard<std::mutex> lock(rpc_lock);
+     if (!is_connected.load()) return;
      presence = discord::Presence{};  // Full reset
      rpc.clearPresence();
      rpc.shutdown();
