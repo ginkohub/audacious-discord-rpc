@@ -39,7 +39,7 @@ the new `LISTENING` activity type (“Listening to...”) and a progress bar.
      align="center"
      width="70%" />
 
-<sub><i>Note: Cover art fetching is experimental, unstable and WiP. It is available as an opt-in setting in [pre-releases](https://github.com/onegentig/audacious-discord-rpc/releases) (since v2.2-pre2511A). Covers are fetched from [MusicBrainz][15] ([CAA][16]).</i></sub>
+<sub><i>Note: Cover art fetching is experimental, unstable and WiP. It is available as an opt-in setting. Covers are fetched from [MusicBrainz][15] ([CAA][16]).</i></sub>
 
 ## Installation
 
