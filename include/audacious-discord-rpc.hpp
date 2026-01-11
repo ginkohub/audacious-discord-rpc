@@ -59,6 +59,8 @@ inline bool cover_fetch_stop(unsigned long long req_id) {
 
 /* === Discord Functions === */
 
+constexpr int DEFAULT_DISPLAY_TYPE = static_cast<int>(discord::StatusDisplayType::Name);
+
 void init_discord();
 void clear_discord();
 void cleanup_discord();
@@ -87,7 +89,14 @@ String field_sanitise(const String &field) {
 
      if (field_len < 2) return String(str_concat({field, " "}).settle());
      if (field_len <= 128) return field;
-     return String(str_concat({str_copy(field_c, 124), "..."}).settle());
+
+     // Attempt UTF-8-safe truncation
+     unsigned int ofst_end = 124;
+     while (ofst_end > 0 && ((unsigned char)field_c[ofst_end] & 0xC0) == 0x80)
+          --ofst_end;
+     if (ofst_end == 0) ofst_end = 124; // Just in case
+
+     return String(str_concat({str_copy(field_c, ofst_end), "..."}).settle());
 }
 
 void open_github() {

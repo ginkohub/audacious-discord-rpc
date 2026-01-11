@@ -68,7 +68,7 @@ const char *const RPCPlugin::defaults[] = {
     "hide_when_paused",
     "FALSE",
     "status_display_type",
-    int_to_str(static_cast<int>(discord::StatusDisplayType::Name)),
+    int_to_str(DEFAULT_DISPLAY_TYPE),
     nullptr};
 
 const PluginPreferences RPCPlugin::prefs
@@ -163,7 +163,7 @@ void playback_to_presence() {
      title = field_sanitise(title);
      artist = field_sanitise(artist);
      bool has_album = !audstr_empty(album);
-     album = has_album ? field_sanitise(album) : String("");
+     album = has_album ? field_sanitise(album) : String("[unknown]");
      int status_display_type = aud_get_int(PLUGIN_ID, "status_display_type");
 
      std::lock_guard<std::mutex> lock(rpc_lock);
