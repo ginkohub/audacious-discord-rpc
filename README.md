@@ -62,7 +62,7 @@ Plugin is compiled for Linux and Windows (10+).
      `discord-rpc.dll` for Windows.
 
 2. **Find the plugin directory.** More specific notes on finding it are in the included
-     `INSTALL.*.txt`. On Linux, you can find the directory via `pkg-config` if you
+     `INSTALL.[PLATFORM].txt`. On Linux, you can find the directory via `pkg-config` if you
      installed Audacious as a system package:
 
      ```sh
@@ -132,23 +132,39 @@ sudo rm $(pkg-config --variable=plugin_dir audacious)/General/libaudacious-plugi
 
 ## Building
 
-**TODO:** I will make a more proper building guide later. If you ever used CMake before though,
-it is rather standard. On Linux, you need `audacious-dev` (DEB) / `audacious-devel` (RPM)
-package installed system-wide (Audacious headers) as well as cURL, git and CMake. \
-On Windows, compilation is possible only on [MSYS2](https://www.msys2.org) MINGW64 environment
-and you’ll need something like this (may be incomplete):
+Making a full-on release can take a while. At times, an issue can be fixed on git `master`
+but it can take a while until a release with a fix is made. If you are more technically
+aligned or want to help with development, you can always build this plugin yourself.
+
+**Pre-requisites**, no matter the platform, is Git, CMAKE and a C++ building toolchain.
+**On Linux**, you need to install cURL and Audacious development libraries via the native
+package manager (or wrapper idc) as `audacious-dev` (Debian/Ubuntu-based DEB) or `audacious-devel`
+(Red Hat-based RPM). The development libraries should be automatically installed on Arch-based
+distributions. **On Windows**, you need a [MSYS2](https://www.msys2.org) MINGW64 environment.
+To ensure all you need is installed on there, run this:
 
 ```bash
 pacman -Syu
 pacman -S base-devel git mingw-w64-x86_64-toolchain mingw-w64-x86_64-gcc mingw-w64-x86_64-glib2 mingw-w64-x86_64-cmake mingw-w64-x86_64-pkg-config
 ```
 
-After that, it’s just a matter of this: (both platforms)
+For cover art fetching capabilities, Linux uses cURL and Windows uses built-in WinHTTP. On
+distributions without cURL, it is possible to build the plugin with this functionality unavailable.
+
+After ensuring all the pre-requisites are installed, building is just a matter of calling `cmake`:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-sudo cmake --install build # optionally copies to General, if found
+```
+
+The built version should be optimised for speed (`-Ofast`). For debugging needs, you can use
+`-DCMAKE_BUILD_TYPE=Debug` which adds `-Og` and bakes in debug symbols. The resulting
+`discord-rpc.so` (Linux) or `discord-rpc.dll` (Windows) should then be copied to general plugins
+directory, as described above. Linux users can use an `install` command for this:
+
+```bash
+sudo cmake --install build
 ```
 
 ## Licence
