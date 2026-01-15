@@ -39,7 +39,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -Og -fsanitize=undefined")
 # === DEFINITION === #
 
 project(audacious-discord-rpc
-  VERSION 2.2
+  VERSION 2.3
   HOMEPAGE_URL https://github.com/onegentig/audacious-discord-rpc
   LANGUAGES CXX
 )

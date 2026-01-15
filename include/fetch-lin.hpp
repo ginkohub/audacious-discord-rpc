@@ -6,7 +6,7 @@
  * @date 2025-11-24 (last modified)
  *
  * @license MIT
- * @copyright Copyright (c) 2025 onegen
+ * @copyright Copyright (c) 2025–2026 onegen
  *
  */
 
@@ -41,7 +41,7 @@ static size_t write_cb(void* c, size_t s, size_t n, void* u) {
 
 /** @brief User-Agent */
 static const char* ua
-    = "Audacious Discord RPC/2.2 "
+    = "Audacious Discord RPC/master "
       "(+https://github.com/onegen-dev/audacious-discord-rpc)";
 
 static std::optional<std::string> fetch(const std::string& url) noexcept {

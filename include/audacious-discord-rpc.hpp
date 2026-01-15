@@ -1,13 +1,13 @@
 /**
  * @file audacious-discord-rpc.hpp
  * @brief Discord Rich Presence plugin for Audacious (header)
- * @version 2.2
+ * @version 2.3
  * @author onegen <onegen@onegen.dev>
  * @author Derzsi Dániel <daniel@tohka.us>
  * @date 2025-11-28 (last modified)
  *
  * @license MIT
- * @copyright Copyright (c) 2024–2025 onegen
+ * @copyright Copyright (c) 2024–2026 onegen
  *                          2018–2022 Derzsi Dániel
  *
  */
