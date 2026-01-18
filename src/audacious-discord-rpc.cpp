@@ -68,7 +68,7 @@ const char *const RPCPlugin::defaults[] = {
     "hide_when_paused",
     "FALSE",
     "status_display_type",
-    int_to_str(DEFAULT_DISPLAY_TYPE),
+    int_to_str(DISCORD_DEFAULT_DISPLAY),
     nullptr};
 
 const PluginPreferences RPCPlugin::prefs
@@ -78,53 +78,54 @@ EXPORT RPCPlugin aud_plugin_instance;
 
 /* === Discord RPC Setup === */
 
-static discord::RPCManager &rpc = discord::RPCManager::get();
-static discord::Presence presence;
+static discord::RPCManager &conn = discord::RPCManager::get();
+static discord::Presence rpc;
 
 void init_discord() {
-     rpc.setClientID(DISCORD_APP_ID).initialize();
-     rpc.onReady([](const discord::User &) {
-             is_connected.store(true);
-             AUDINFO("Discord RPC Connected.\r\n");
-             playback_to_presence();  // Directly played track? #8
-        })
+     conn.setClientID(DISCORD_APP_ID);
+     conn.onReady([](const discord::User &) {
+              is_connected.store(true);
+              AUDINFO("Discord RPC connected.\r\n");
+              playback_to_presence();  // Directly played track? #8
+         })
          .onDisconnected([](int, std::string_view) {
               is_connected.store(false);
-              AUDINFO("Discord RPC Disconnected.\r\n");
+              AUDINFO("Discord RPC disconnected.\r\n");
          })
          .onErrored([](int, std::string_view msg) {
-              AUDERR("Discord RPC Error: %s\r\n", msg.data());
+              AUDERR("Discord RPC error: %s\r\n", msg.data());
          });
+     conn.initialize();
 }
 
 void clear_discord() {
      std::lock_guard<std::mutex> lock(rpc_lock);
      if (!is_connected.load()) return;
-     ++req_id_now;  // Invalidate cover fetch tasks
-     presence = discord::Presence{};  // Full reset
-     rpc.clearPresence();
-     presence.setLargeImageKey("logo").setLargeImageText("Audacious");
+     ++req_id_now;               // Invalidate cover fetch tasks
+     rpc = discord::Presence{};  // Full reset
+     conn.clearPresence();
+     rpc.setLargeImageKey("logo").setLargeImageText("Audacious");
 }
 
 void cleanup_discord() {
      std::lock_guard<std::mutex> lock(rpc_lock);
      if (!is_connected.load()) return;
-     presence = discord::Presence{};  // Full reset
-     rpc.clearPresence();
-     rpc.shutdown();
+     rpc = discord::Presence{};  // Full reset
+     conn.clearPresence();
+     conn.shutdown();
      is_connected.store(false);
-     AUDINFO("Discord RPC Shutdown completed.\r\n");
+     AUDINFO("Discord RPC shut down.\r\n");
 }
 
 void update_presence() {
      if (!is_connected.load()) return;
-     rpc.setPresence(presence).refresh();
+     conn.setPresence(rpc).refresh();
 }
 
 void init_presence() {
      std::lock_guard<std::mutex> lock(rpc_lock);
-     presence = discord::Presence{};
-     presence.setLargeImageKey("logo").setLargeImageText("Audacious");
+     rpc = discord::Presence{};
+     rpc.setLargeImageKey("logo").setLargeImageText("Audacious");
      update_presence();
      req_id_now = 0;
 }
@@ -154,7 +155,7 @@ void playback_to_presence() {
           title = tuple.get_str(Tuple::Basename);
           if (audstr_empty(title)) {
                // Give up
-               AUDINFO("Discord RPC: No title or filename, giving up.\r\n");
+               AUDINFO("Discord RPC: no title or filename, giving up.\r\n");
                clear_discord();
                return;
           }
@@ -167,7 +168,7 @@ void playback_to_presence() {
      int status_display_type = aud_get_int(PLUGIN_ID, "status_display_type");
 
      std::lock_guard<std::mutex> lock(rpc_lock);
-     presence.setLargeImageKey("logo")
+     rpc.setLargeImageKey("logo")
          .setActivityType(discord::ActivityType::Listening)
          .setStatusDisplayType(
              static_cast<discord::StatusDisplayType>(status_display_type))
@@ -181,7 +182,7 @@ void playback_to_presence() {
           const auto now = std::chrono::system_clock::now();
           const auto start_time
               = now - std::chrono::seconds(aud_drct_get_time() / 1000);
-          presence.setStartTimestamp(
+          rpc.setStartTimestamp(
               std::chrono::duration_cast<std::chrono::seconds>(
                   start_time.time_since_epoch())
                   .count());
@@ -190,25 +191,25 @@ void playback_to_presence() {
           if (length_s > 0) {
                const auto end_time
                    = start_time + std::chrono::seconds(length_s);
-               presence.setEndTimestamp(
+               rpc.setEndTimestamp(
                    std::chrono::duration_cast<std::chrono::seconds>(
                        end_time.time_since_epoch())
                        .count());
           } else {
-               presence.setEndTimestamp(0);
+               rpc.setEndTimestamp(0);
           }
      } else {
-          presence.setStartTimestamp(0).setEndTimestamp(0);
+          rpc.setStartTimestamp(0).setEndTimestamp(0);
      }
 
      update_presence();
-     AUDINFO("Discord RPC: playback_to_presence successfully updated RPC!\r\n");
+     AUDINFO("Discord RPC: playback_to_presence updated RPC\r\n");
 
      if (has_album && aud_get_bool(PLUGIN_ID, "fetch_covers")) {
           String album_artist = tuple.get_str(Tuple::AlbumArtist);
           bool has_album_artist = !audstr_empty(album_artist);
 
-          AUDINFO("Discord RPC: Starting a cover art fetching task\r\n");
+          AUDINFO("Discord RPC: starting cover art fetching task\r\n");
           cover_to_presence(has_album_artist ? album_artist : artist, album);
      }
 }
@@ -227,12 +228,12 @@ void cover_to_presence(const String &artist, const String &album) {
           if (url && !url->empty()
               && req_id == req_id_now.load(std::memory_order_relaxed)) {
                std::lock_guard<std::mutex> lock(rpc_lock);
-               presence.setLargeImageKey(*url);
+               rpc.setLargeImageKey(*url);
                update_presence();
-               AUDINFO("Discord RPC: Cover fetch task %llu applied!\r\n",
+               AUDINFO("Discord RPC: cover fetch task %llu applied\r\n",
                        req_id);
           } else {
-               AUDINFO("Discord RPC: Dismissed stale fetch task %llu.\r\n",
+               AUDINFO("Discord RPC: dismissed stale fetch task %llu\r\n",
                        req_id);
           }
      }).detach();

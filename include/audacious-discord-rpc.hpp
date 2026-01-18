@@ -47,19 +47,24 @@
 
 #define PLUGIN_NAME "Discord RPC"
 #define PLUGIN_ID "discord-rpc"
-#define PLUGIN_URL "https://github.com/onegentig/audacious-discord-rpc"
+#define PLUGIN_URL "https://github.com/onegen-dev/audacious-discord-rpc"
 #define DISCORD_APP_ID "1428914566795890738"
 
+/** Mutual access lock to presence data editing */
 std::mutex rpc_lock;
+/** "Is Discord connected?" atomic flag */
 static std::atomic<bool> is_connected{false};
+/** Current cover fetching request number */
 static std::atomic<unsigned long long> req_id_now{0};
+/** Checks if the req_id is stale */
 inline bool cover_fetch_stop(unsigned long long req_id) {
      return req_id != req_id_now.load();
 }
 
 /* === Discord Functions === */
 
-constexpr int DEFAULT_DISPLAY_TYPE = static_cast<int>(discord::StatusDisplayType::Name);
+constexpr int DISCORD_DEFAULT_DISPLAY
+    = static_cast<int>(discord::StatusDisplayType::Name);
 
 void init_discord();
 void clear_discord();
@@ -94,7 +99,7 @@ String field_sanitise(const String &field) {
      unsigned int ofst_end = 124;
      while (ofst_end > 0 && ((unsigned char)field_c[ofst_end] & 0xC0) == 0x80)
           --ofst_end;
-     if (ofst_end == 0) ofst_end = 124; // Just in case
+     if (ofst_end == 0) ofst_end = 124;  // Just in case
 
      return String(str_concat({str_copy(field_c, ofst_end), "..."}).settle());
 }
@@ -104,24 +109,24 @@ void open_github() {
      auto ret
          = ShellExecuteW(NULL, L"open", L"" PLUGIN_URL, NULL, NULL, SW_NORMAL);
      if ((intptr_t)ret <= 32) AUDERR("Failed to open URL: %s\r\n", PLUGIN_URL);
-          /**
-           * If the function succeeds, it returns a value greater than 32.
-           *
-           * @cite
-           * https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutew#return-value
-           */
+     /**
+      * If the function succeeds, it returns a value greater than 32.
+      *
+      * @cite
+      * https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutew#return-value
+      */
 #else
      int ret = system("xdg-open " PLUGIN_URL);
      if (ret == -1 || ret == 127)
           AUDERR("Failed to open URL: %s\r\n", PLUGIN_URL);
-          /**
-           * -1 indicates fork/exec error and 127 means the command was not
-           * found. Other errors are related to the user environment and are not
-           * worth blocking over: “xdg-open inherits most of the flaws of its
-           * configuration and the underlying opener”
-           *
-           * @cite
-           * https://manpages.ubuntu.com/manpages/questing/en/man1/xdg-open.1.html
-           */
+     /**
+      * -1 indicates fork/exec error and 127 means the command was not
+      * found. Other errors are related to the user environment and are not
+      * worth blocking over: “xdg-open inherits most of the flaws of its
+      * configuration and the underlying opener”
+      *
+      * @cite
+      * https://manpages.ubuntu.com/manpages/questing/en/man1/xdg-open.1.html
+      */
 #endif
 }
