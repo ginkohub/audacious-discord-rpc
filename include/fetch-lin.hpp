@@ -41,7 +41,7 @@ static size_t write_cb(void* c, size_t s, size_t n, void* u) {
 
 /** @brief User-Agent */
 static const char* ua
-    = "Audacious Discord RPC/master "
+    = "Audacious-Discord-RPC/master "
       "(+https://github.com/onegen-dev/audacious-discord-rpc)";
 
 static std::optional<std::string> fetch(const std::string& url) noexcept {
