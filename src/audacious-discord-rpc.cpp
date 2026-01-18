@@ -249,6 +249,7 @@ bool RPCPlugin::init() {
      hook_associate("playback ready", on_playback_update_rpc, nullptr);
      hook_associate("playback end", on_playback_update_rpc, nullptr);
      hook_associate("playback stop", on_playback_update_rpc, nullptr);
+     hook_associate("playback seek", on_playback_update_rpc, nullptr);
      hook_associate("playback pause", on_playback_update_rpc, nullptr);
      hook_associate("playback unpause", on_playback_update_rpc, nullptr);
      hook_associate("title change", on_playback_update_rpc, nullptr);
@@ -259,6 +260,7 @@ void RPCPlugin::cleanup() {
      hook_dissociate("playback ready", on_playback_update_rpc);
      hook_dissociate("playback end", on_playback_update_rpc);
      hook_dissociate("playback stop", on_playback_update_rpc);
+     hook_dissociate("playback seek", on_playback_update_rpc);
      hook_dissociate("playback pause", on_playback_update_rpc);
      hook_dissociate("playback unpause", on_playback_update_rpc);
      hook_dissociate("title change", on_playback_update_rpc);
