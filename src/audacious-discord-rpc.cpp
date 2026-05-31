@@ -218,6 +218,8 @@ void playback_to_presence() {
 
 void cover_to_presence(const String &artist, const String &album) {
 #if (defined(DISABLE_RPC_CAF) && DISABLE_RPC_CAF)
+     (void)artist;
+     (void)album;
      return;
 #else
      unsigned long long req_id = ++req_id_now;

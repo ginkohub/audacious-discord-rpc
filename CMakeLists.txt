@@ -33,6 +33,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 add_compile_options(-Wall -Wextra -Wpedantic)
+add_definitions(-DGLZ_USE_STD_FORMAT_FLOAT=0)
 set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Ofast -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Og -fsanitize=undefined")
 

@@ -37,6 +37,7 @@
 #     include <shellapi.h>
 #else
 #     include <cstdlib>
+#     include <cstring>
 #endif
 
 #if (!(defined(DISABLE_RPC_CAF)) && !(DISABLE_RPC_CAF))

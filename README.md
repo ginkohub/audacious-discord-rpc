@@ -9,6 +9,8 @@ Displays what you’re vibing to in your Discord profile. 🧑‍🎤🎶
           alt="Example user popout with Audacious Discord RPC" />
 </div>
 
+This is a fork of [onegen](4) that bypass the requirement for the <format> header in the glaze library, which is missing in GCC 12. Tested on Debian 12.2.0 (bookworm) with g++ 12.2.0.
+
 This is a modernisation hard-fork by [onegen][4] of [`darktohka/audacious-plugin-rpc`][3]
 (made in 2018, abandoned in 2022) by [DarkTohka][5] [et al.][11] \
 It migrates the plugin from the deprecated [`discord/discord-rpc`][6]
